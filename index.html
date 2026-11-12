@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>FXszama na mieście</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Gloock&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet"><style id="css">
+/* Layout: stół z 26 talerzami w stylu bolesławieckim po lewej, karta miesiąca po prawej, dziennik pod spodem. */
+:root{
+  --bg:#eef1f8; --surface:#ffffff; --plate:#fbfcff; --ink:#111c3f; --muted:#5b6585;
+  --cobalt:#1f3f9c; --cobalt-soft:#dbe3f7; --mustard:#d99a1c; --stamp:#b8402b; --line:#cdd5ea;
+  --display:"Gloock","Iowan Old Style",Georgia,serif;
+  --body:"Onest","Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0c1330; --surface:#141d44; --plate:#e9edfa; --ink:#eef1fb; --muted:#a3add0;
+    --cobalt:#8fa8f5; --cobalt-soft:#1f2b5e; --mustard:#f0b740; --stamp:#f08a72; --line:#2b3870;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c1330; --surface:#141d44; --plate:#e9edfa; --ink:#eef1fb; --muted:#a3add0;
+  --cobalt:#8fa8f5; --cobalt-soft:#1f2b5e; --mustard:#f0b740; --stamp:#f08a72; --line:#2b3870;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:1120px;margin:0 auto;padding:28px 20px 56px;display:flex;flex-direction:column;gap:28px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:2px solid var(--ink);padding-bottom:18px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(2.2rem,6vw,3.6rem);line-height:1;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 em{font-style:normal;color:var(--cobalt)}
+.month{font-size:.82rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 8px}
+h2{font-family:var(--display);font-weight:400;font-size:1.6rem;line-height:1.15;margin:0;text-wrap:balance}
+h3{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0}
+p{margin:0}
+.muted{color:var(--muted)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--mustard);outline-offset:3px}
+.btn{background:var(--cobalt);color:var(--bg);border:0;border-radius:999px;padding:13px 24px;font-weight:700;font-size:1rem}
+.btn:hover{filter:brightness(1.1)}
+.btn[disabled]{opacity:.5;cursor:default}
+.btn.ghost{background:transparent;color:var(--cobalt);border:1.5px solid var(--cobalt);padding:8px 16px;font-size:.9rem;font-weight:600}
+.main{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:820px){.main{grid-template-columns:1fr}}
+.table{display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:14px}
+.plate{position:relative;aspect-ratio:1;border-radius:50%;border:0;background:var(--plate);color:#111c3f;
+  box-shadow:0 0 0 2px #1f3f9c,0 6px 14px rgba(17,28,63,.18);font-family:var(--display);font-size:1.7rem;line-height:1;
+  display:grid;place-items:center;transition:transform .15s}
+.plate::before{content:"";position:absolute;inset:7px;border-radius:50%;border:3px dotted #1f3f9c;opacity:.75}
+.plate:hover{transform:translateY(-2px)}
+.plate.empty{opacity:.32;cursor:default;box-shadow:0 0 0 2px #1f3f9c}
+.plate.empty:hover{transform:none}
+.plate.used{color:#b8402b}
+.plate.used::after{content:attr(data-when);position:absolute;bottom:-7px;left:50%;transform:translateX(-50%) rotate(-4deg);
+  background:#b8402b;color:#fff;font-family:var(--body);font-size:.6rem;font-weight:700;letter-spacing:.04em;padding:1px 6px;border-radius:3px;white-space:nowrap}
+.plate.view{box-shadow:0 0 0 4px var(--mustard),0 6px 14px rgba(17,28,63,.18)}
+.plate.now{background:#1f3f9c;color:#fff}
+.plate.now::before{border-color:#fff}
+.plate.spin{background:var(--mustard);transform:scale(1.12)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.85rem;color:var(--muted);margin-top:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:18px}
+.letterline{display:flex;align-items:center;gap:16px}
+.big{font-family:var(--display);font-size:4.6rem;line-height:.9;color:var(--cobalt);min-width:1.1ch}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:transparent;border:1.5px solid var(--line);border-radius:999px;padding:6px 13px;font-size:.95rem;display:inline-flex;gap:7px;align-items:center}
+.chip:hover{border-color:var(--cobalt)}
+.chip.easy{border-color:var(--cobalt);background:var(--cobalt-soft)}
+.chip.on{background:var(--cobalt);border-color:var(--cobalt);color:var(--bg);font-weight:600}
+.where{border-top:1px solid var(--line);padding-top:18px;display:flex;flex-direction:column;gap:12px}
+.links{display:flex;flex-direction:column;gap:8px}
+a.link{display:flex;justify-content:space-between;gap:12px;align-items:center;text-decoration:none;color:var(--ink);
+  border:1.5px solid var(--line);border-radius:10px;padding:11px 14px;font-weight:600}
+a.link:hover{border-color:var(--cobalt)}
+a.link.primary{background:var(--cobalt);border-color:var(--cobalt);color:var(--bg)}
+a.link span{font-weight:400;font-size:.85rem;opacity:.85}
+.warn{border-left:4px solid var(--mustard);padding:4px 0 4px 12px;font-size:.92rem}
+label{font-size:.85rem;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+input[type=text]{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.log{display:flex;flex-direction:column;gap:12px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto}
+th{text-align:left;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:2px solid var(--ink)}
+td{padding:10px;border-bottom:1px solid var(--line)}
+td.l{font-family:var(--display);font-size:1.3rem;color:var(--cobalt)}
+.status{font-size:.82rem;color:var(--muted);min-height:1.2em}
+@media (prefers-reduced-motion:reduce){.plate{transition:none}}
+</style></head><body><div id="app"></div><script id="main">
+"use strict";
+var REG={af:"afrykańska",arab:"arabska",bw:"bliskowschodnia",kar:"karaibska",lat:"latynoamerykańska",az:"azjatycka",bal:"bałkańska",kau:"kaukaska",sr:"śródziemnomorska",sk:"skandynawska",oce:"polinezyjska",eu:"europejska",sa:"środkowoazjatycka",ind:"indyjska"};
+// Nazwa|ISO|przymiotnik kuchni|region zapasowy|1 = kuchnia łatwa do znalezienia w Warszawie
+var RAW={
+A:"Afganistan|AF|afgańska|sa|;Albania|AL|albańska|bal|;Algieria|DZ|algierska|arab|;Andora|AD|katalońska|sr|;Angola|AO|angolska|af|;Antigua i Barbuda|AG||kar|;Arabia Saudyjska|SA|saudyjska|arab|;Argentyna|AR|argentyńska|lat|1;Armenia|AM|ormiańska|kau|1;Australia|AU|australijska|eu|;Austria|AT|austriacka|eu|;Azerbejdżan|AZ|azerska|kau|",
+B:"Bahamy|BS||kar|;Bahrajn|BH||arab|;Bangladesz|BD|bengalska|ind|;Barbados|BB||kar|;Belgia|BE|belgijska|eu|;Belize|BZ||lat|;Benin|BJ||af|;Bhutan|BT|bhutańska|ind|;Białoruś|BY|białoruska|eu|1;Boliwia|BO|boliwijska|lat|;Bośnia i Hercegowina|BA|bośniacka|bal|;Botswana|BW||af|;Brazylia|BR|brazylijska|lat|1;Brunei|BN||az|;Bułgaria|BG|bułgarska|bal|;Burkina Faso|BF||af|;Burundi|BI||af|",
+C:"Chile|CL|chilijska|lat|;Chiny|CN|chińska|az|1;Chorwacja|HR|chorwacka|bal|;Cypr|CY|cypryjska|sr|;Czad|TD||af|;Czarnogóra|ME|czarnogórska|bal|;Czechy|CZ|czeska|eu|1",
+D:"Dania|DK|duńska|sk|;Demokratyczna Republika Konga|CD|kongijska|af|;Dominika|DM||kar|;Dominikana|DO|dominikańska|kar|;Dżibuti|DJ||af|",
+E:"Egipt|EG|egipska|arab|;Ekwador|EC|ekwadorska|lat|;Erytrea|ER|erytrejska|af|;Estonia|EE|estońska|eu|;Eswatini|SZ||af|;Etiopia|ET|etiopska|af|",
+F:"Fidżi|FJ||oce|;Filipiny|PH|filipińska|az|;Finlandia|FI|fińska|sk|;Francja|FR|francuska|eu|1",
+G:"Gabon|GA||af|;Gambia|GM||af|;Ghana|GH|ghańska|af|;Grecja|GR|grecka|sr|1;Grenada|GD||kar|;Gruzja|GE|gruzińska|kau|1;Gujana|GY||kar|;Gwatemala|GT|gwatemalska|lat|;Gwinea|GN||af|;Gwinea Bissau|GW||af|;Gwinea Równikowa|GQ||af|",
+H:"Haiti|HT|haitańska|kar|;Hiszpania|ES|hiszpańska|sr|1;Holandia|NL|holenderska|eu|;Honduras|HN||lat|",
+I:"Indie|IN|indyjska|az|1;Indonezja|ID|indonezyjska|az|;Irak|IQ|iracka|arab|;Iran|IR|perska|bw|;Irlandia|IE|irlandzka|eu|;Islandia|IS|islandzka|sk|;Izrael|IL|izraelska|bw|1",
+J:"Jamajka|JM|jamajska|kar|;Japonia|JP|japońska|az|1;Jemen|YE|jemeńska|arab|;Jordania|JO|jordańska|arab|",
+K:"Kambodża|KH|kambodżańska|az|;Kamerun|CM|kameruńska|af|;Kanada|CA|kanadyjska|eu|;Katar|QA||arab|;Kazachstan|KZ|kazachska|sa|;Kenia|KE|kenijska|af|;Kirgistan|KG|kirgiska|sa|;Kiribati|KI||oce|;Kolumbia|CO|kolumbijska|lat|;Komory|KM||af|;Kongo|CG|kongijska|af|;Korea Południowa|KR|koreańska|az|1;Korea Północna|KP|koreańska|az|1;Kosowo|XK|kosowska|bal|;Kostaryka|CR|kostarykańska|lat|;Kuba|CU|kubańska|kar|;Kuwejt|KW||arab|",
+L:"Laos|LA|laotańska|az|;Lesotho|LS||af|;Liban|LB|libańska|bw|1;Liberia|LR||af|;Libia|LY|libijska|arab|;Liechtenstein|LI|szwajcarska|eu|;Litwa|LT|litewska|eu|;Luksemburg|LU|luksemburska|eu|;Łotwa|LV|łotewska|eu|",
+M:"Macedonia Północna|MK|macedońska|bal|;Madagaskar|MG|malgaska|af|;Malawi|MW||af|;Malediwy|MV|malediwska|ind|;Malezja|MY|malezyjska|az|;Mali|ML|malijska|af|;Malta|MT|maltańska|sr|;Maroko|MA|marokańska|arab|1;Mauretania|MR||af|;Mauritius|MU||af|;Meksyk|MX|meksykańska|lat|1;Mikronezja|FM||oce|;Mjanma|MM|birmańska|az|;Mołdawia|MD|mołdawska|eu|;Monako|MC|francuska|sr|;Mongolia|MN|mongolska|az|;Mozambik|MZ|mozambicka|af|",
+N:"Namibia|NA||af|;Nauru|NR||oce|;Nepal|NP|nepalska|ind|1;Niemcy|DE|niemiecka|eu|1;Niger|NE||af|;Nigeria|NG|nigeryjska|af|;Nikaragua|NI||lat|;Norwegia|NO|norweska|sk|;Nowa Zelandia|NZ|nowozelandzka|eu|",
+O:"Oman|OM|omańska|arab|",
+P:"Pakistan|PK|pakistańska|ind|;Palau|PW||oce|;Palestyna|PS|palestyńska|bw|;Panama|PA|panamska|lat|;Papua-Nowa Gwinea|PG||oce|;Paragwaj|PY|paragwajska|lat|;Peru|PE|peruwiańska|lat|1;Polska|PL|polska|eu|1;Portugalia|PT|portugalska|sr|1",
+Q:"",
+R:"Republika Południowej Afryki|ZA|południowoafrykańska|af|;Republika Środkowoafrykańska|CF||af|;Republika Zielonego Przylądka|CV|kabowerdyjska|af|;Rosja|RU|rosyjska|eu|;Rumunia|RO|rumuńska|bal|;Rwanda|RW||af|",
+S:"Saint Kitts i Nevis|KN||kar|;Saint Lucia|LC||kar|;Saint Vincent i Grenadyny|VC||kar|;Salwador|SV|salwadorska|lat|;Samoa|WS||oce|;San Marino|SM|włoska|sr|;Senegal|SN|senegalska|af|;Serbia|RS|serbska|bal|;Seszele|SC|kreolska|af|;Sierra Leone|SL||af|;Singapur|SG|singapurska|az|;Słowacja|SK|słowacka|eu|;Słowenia|SI|słoweńska|bal|;Somalia|SO|somalijska|af|;Sri Lanka|LK|lankijska|ind|;Stany Zjednoczone|US|amerykańska|eu|1;Sudan|SD|sudańska|af|;Sudan Południowy|SS||af|;Surinam|SR|surinamska|kar|;Syria|SY|syryjska|bw|1;Szwajcaria|CH|szwajcarska|eu|;Szwecja|SE|szwedzka|sk|",
+T:"Tadżykistan|TJ|tadżycka|sa|;Tajlandia|TH|tajska|az|1;Tajwan|TW|tajwańska|az|;Tanzania|TZ|tanzańska|af|;Timor Wschodni|TL||az|;Togo|TG||af|;Tonga|TO||oce|;Trynidad i Tobago|TT||kar|;Tunezja|TN|tunezyjska|arab|;Turcja|TR|turecka|bw|1;Turkmenistan|TM|turkmeńska|sa|;Tuvalu|TV||oce|",
+U:"Uganda|UG|ugandyjska|af|;Ukraina|UA|ukraińska|eu|1;Urugwaj|UY|urugwajska|lat|;Uzbekistan|UZ|uzbecka|sa|1",
+V:"Vanuatu|VU||oce|",
+W:"Watykan|VA|rzymska|sr|;Wenezuela|VE|wenezuelska|lat|;Węgry|HU|węgierska|eu|1;Wielka Brytania|GB|brytyjska|eu|;Wietnam|VN|wietnamska|az|1;Włochy|IT|włoska|sr|1;Wybrzeże Kości Słoniowej|CI|iworyjska|af|;Wyspy Marshalla|MH||oce|;Wyspy Salomona|SB||oce|;Wyspy Świętego Tomasza i Książęca|ST||af|",
+X:"",Y:"",
+Z:"Zambia|ZM|zambijska|af|;Zimbabwe|ZW||af|;Zjednoczone Emiraty Arabskie|AE|emiracka|arab|"
+};
+var LETTERS="ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+var DATA={};
+LETTERS.forEach(function(L){
+  DATA[L]=RAW[L]?RAW[L].split(";").map(function(s){var p=s.split("|");return{name:p[0],iso:p[1],adj:p[2],reg:p[3],easy:p[4]==="1"};}):[];
+});
+var ACTIVE=LETTERS.filter(function(L){return DATA[L].length>0;});
+var MONTHS=["styczeń","luty","marzec","kwiecień","maj","czerwiec","lipiec","sierpień","wrzesień","październik","listopad","grudzień"];
+var MSHORT=["sty","lut","mar","kwi","maj","cze","lip","sie","wrz","paź","lis","gru"];
+
+function flag(iso){
+  if(iso==="XK")return "🇽🇰";
+  return String.fromCodePoint(0x1F1E6+iso.charCodeAt(0)-65,0x1F1E6+iso.charCodeAt(1)-65);
+}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function ymNow(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
+function ymLabel(ym){var p=ym.split("-");return MONTHS[+p[1]-1]+" "+p[0];}
+function ymShort(ym){var p=ym.split("-");return MSHORT[+p[1]-1]+" "+p[0].slice(2);}
+
+var state={entries:[],updatedAt:0};
+try{var ls=JSON.parse(localStorage.getItem("kuchnie-az")||"null");if(ls&&Array.isArray(ls.entries))state=ls;}catch(e){}
+var GH={owner:"pacy2u",repo:"FXszama_dziennik",path:"wizyty.json"},ghSha=null,token="";
+try{token=localStorage.getItem("kuchnie-az-token")||"";}catch(e){}
+
+var YM=ymNow();
+var saveTimer=null, spinning=false, statusMsg="";
+function current(){return state.entries.find(function(e){return e.ym===YM;})||null;}
+var viewLetter=current()?current().letter:null;
+
+function localSave(){try{localStorage.setItem("kuchnie-az",JSON.stringify(state));}catch(e){}}
+function ghUrl(){return "https://api.github.com/repos/"+GH.owner+"/"+GH.repo+"/contents/"+GH.path;}
+function ghHeaders(){return {"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};}
+function ghError(e){
+  var c=e&&e.message;
+  setStatus(c==="401"?"GitHub odrzucił token. Wklej nowy w sekcji Prywatny dziennik.":
+    c==="404"||c==="403"?"Token nie ma dostępu do zapisu w repozytorium "+GH.repo+". Dane zostały w tej przeglądarce.":
+    "Brak połączenia z GitHubem. Dane zostały w tej przeglądarce.");
+}
+function push(){
+  var body={message:"Dziennik "+YM,content:btoa(unescape(encodeURIComponent(JSON.stringify(state,null,1))))};
+  if(ghSha)body.sha=ghSha;
+  return fetch(ghUrl(),{method:"PUT",headers:ghHeaders(),body:JSON.stringify(body)}).then(function(r){
+    if(!r.ok)throw new Error(String(r.status));return r.json();
+  }).then(function(j){ghSha=j.content.sha;setStatus("Zapisano w prywatnym repozytorium.");});
+}
+function pull(){
+  if(!token)return Promise.resolve();
+  setStatus("Pobieram dziennik…");
+  return fetch(ghUrl(),{headers:ghHeaders(),cache:"no-store"}).then(function(r){
+    if(r.status===404)return null;
+    if(!r.ok)throw new Error(String(r.status));
+    return r.json();
+  }).then(function(j){
+    if(!j){ghSha=null;if(state.entries.length)return push();setStatus("Połączono. Dziennik jest jeszcze pusty.");return;}
+    ghSha=j.sha;
+    var remote=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\s/g,"")))));
+    if((remote.updatedAt||0)>(state.updatedAt||0)){
+      state=remote;if(!Array.isArray(state.entries))state.entries=[];
+      localSave();viewLetter=current()?current().letter:null;viewCountry=null;render();
+    }else if((state.updatedAt||0)>(remote.updatedAt||0))return push();
+    setStatus("Dziennik zgodny z prywatnym repozytorium.");
+  }).catch(ghError);
+}
+function save(){
+  state.updatedAt=Date.now();localSave();
+  clearTimeout(saveTimer);
+  if(!token){setStatus("Zapisano w tej przeglądarce.");return;}
+  saveTimer=setTimeout(function(){push().catch(ghError);},900);
+}
+function setStatus(t){statusMsg=t;var el=document.getElementById("status");if(el)el.textContent=t;}
+
+function usedMap(){ // litera -> ostatni miesiąc w bieżącym cyklu
+  var m={},sorted=state.entries.slice().sort(function(a,b){return a.ym<b.ym?-1:1;});
+  sorted.forEach(function(e){
+    m[e.letter]=e.ym;
+    if(Object.keys(m).length>=ACTIVE.length){var keep=e.letter,k=e.ym;m={};m[keep]=k;}
+  });
+  return m;
+}
+function pool(){
+  var u=usedMap(),cur=current();
+  var p=ACTIVE.filter(function(L){return !u[L];});
+  if(!p.length)p=ACTIVE.filter(function(L){return !cur||L!==cur.letter;});
+  return p;
+}
+function setLetter(L){
+  var cur=current();
+  if(cur){cur.letter=L;cur.country="";cur.place="";}
+  else state.entries.push({ym:YM,letter:L,country:"",place:""});
+  viewLetter=L;save();render();
+}
+function draw(){
+  if(spinning)return;
+  var cur=current();
+  if(cur){state.entries=state.entries.filter(function(e){return e!==cur;});}
+  var p=pool(),pick=p[Math.floor(Math.random()*p.length)];
+  var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduce){setLetter(pick);return;}
+  spinning=true;viewLetter=null;render();
+  var steps=22,i=0,last=null;
+  (function tick(){
+    if(last)last.classList.remove("spin");
+    var L=i===steps?pick:ACTIVE[Math.floor(Math.random()*ACTIVE.length)];
+    last=document.querySelector('.plate[data-l="'+L+'"]');
+    if(last)last.classList.add("spin");
+    if(i===steps){setTimeout(function(){spinning=false;setLetter(pick);},650);return;}
+    i++;setTimeout(tick,60+i*i*0.9);
+  })();
+}
+function maps(q){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q);}
+function gsearch(q){return "https://www.google.com/search?q="+encodeURIComponent(q);}
+
+function render(){
+  var cur=current(),u=usedMap(),m=MONTHS[+YM.split("-")[1]-1];
+  var h='<div class="wrap"><header><div><p class="month">'+esc(ymLabel(YM))+' · Warszawa</p><h1>Kuchnie od <em>A</em> do <em>Z</em></h1></div>'+
+    '<button class="btn" id="draw"'+(spinning?" disabled":"")+'>'+(cur?"Losuj jeszcze raz":"Wylosuj literę na "+m)+'</button></header>';
+  h+='<div class="main"><section aria-label="Alfabet"><div class="table">';
+  LETTERS.forEach(function(L){
+    var n=DATA[L].length,cls="plate";
+    if(!n)cls+=" empty";
+    if(cur&&cur.letter===L)cls+=" now";else if(u[L])cls+=" used";
+    if(viewLetter===L&&!(cur&&cur.letter===L))cls+=" view";
+    var t=n?L+": "+n+" "+(n===1?"kraj":"krajów"):L+": brak krajów po polsku";
+    h+='<button class="'+cls+'" data-l="'+L+'"'+(u[L]&&!(cur&&cur.letter===L)?' data-when="'+ymShort(u[L])+'"':"")+(n?"":" disabled")+' title="'+t+'" aria-label="'+t+'">'+L+'</button>';
+  });
+  h+='</div><div class="legend"><span>Granatowy talerz: litera tego miesiąca</span><span>Czerwona litera z datą: już wylosowana</span><span>Wyblakłe Q, X, Y: po polsku żaden kraj się tak nie zaczyna</span></div></section>';
+
+  h+='<section class="card" aria-live="polite">';
+  if(!viewLetter){
+    h+='<h3>Karta miesiąca</h3><h2>'+(spinning?"Losuję…":"Jeszcze nie ma litery na "+m)+'</h2>'+
+      '<p class="muted">Wylosuj literę albo kliknij talerz, żeby podejrzeć kraje. Losowanie pomija litery już wykorzystane, aż przejdziesz cały alfabet ('+ACTIVE.length+' liter, czyli niecałe dwa lata).</p>';
+  }else{
+    var isCur=cur&&cur.letter===viewLetter,list=DATA[viewLetter];
+    h+='<h3>'+(isCur?"Litera na "+esc(m):"Podgląd litery")+'</h3><div class="letterline"><div class="big">'+viewLetter+'</div><div><h2>'+list.length+' '+(list.length===1?"kraj":list.length<5?"kraje":"krajów")+' do wyboru</h2>'+
+      '<p class="muted">Niebieskie tło: kuchnia łatwa do znalezienia w Warszawie.</p></div></div>';
+    if(!isCur)h+='<div class="row"><button class="btn ghost" id="pick">Ustaw '+viewLetter+' jako literę na '+esc(m)+'</button></div>';
+    h+='<div class="chips">';
+    list.forEach(function(c,i){
+      var on=isCur&&cur.country===c.name;
+      h+='<button class="chip'+(c.easy?" easy":"")+(on?" on":"")+'" data-c="'+i+'" aria-pressed="'+on+'"><span aria-hidden="true">'+flag(c.iso)+'</span>'+esc(c.name)+'</button>';
+    });
+    h+='</div>';
+    var sel=isCur?list.find(function(c){return c.name===cur.country;}):(viewCountry!=null?list[viewCountry]:null);
+    if(sel){
+      var reg=REG[sel.reg],q1=sel.adj?"restauracja "+sel.adj+" Warszawa":null,q2="restauracja "+reg+" Warszawa";
+      h+='<div class="where"><h3>Gdzie zjeść</h3><h2>'+esc(sel.name)+' w Warszawie</h2>';
+      if(!sel.easy)h+='<p class="warn">'+(sel.adj?"Tej kuchni może w Warszawie nie być albo jest jedno miejsce. Jeśli mapa pokaże przypadkowe wyniki, użyj szerszego wyszukiwania.":"Restauracji z kuchnią tego kraju w Warszawie raczej nie znajdziesz. Najbliżej będzie kuchnia "+reg+".")+'</p>';
+      h+='<div class="links">';
+      if(q1)h+='<a class="link primary" href="'+maps(q1)+'" target="_blank" rel="noopener">Restauracje: kuchnia '+esc(sel.adj)+'<span>Google Maps ↗</span></a>';
+      if(sel.adj!==reg)h+='<a class="link'+(q1?"":" primary")+'" href="'+maps(q2)+'" target="_blank" rel="noopener">Szerzej: kuchnia '+esc(reg)+'<span>Google Maps ↗</span></a>';
+      h+='<a class="link" href="'+gsearch("najlepsza restauracja "+(sel.adj||reg)+" Warszawa opinie")+'" target="_blank" rel="noopener">Rankingi i recenzje<span>Google ↗</span></a></div>';
+      if(isCur)h+='<label for="place">Dokąd poszliście (zapisze się w dzienniku)<input type="text" id="place" value="'+esc(cur.place||"")+'" placeholder="np. nazwa restauracji" autocomplete="off"></label>';
+      h+='</div>';
+    }
+  }
+  h+='<p class="status" id="status">'+esc(statusMsg)+'</p></section></div>';
+
+  var rows=state.entries.slice().sort(function(a,b){return a.ym<b.ym?1:-1;});
+  h+='<section class="log"><h2>Dziennik</h2>';
+  if(!rows.length)h+='<p class="muted">Tu pojawią się kolejne miesiące: litera, kraj i restauracja.</p>';
+  else{
+    h+='<div class="scroll"><table><thead><tr><th>Miesiąc</th><th>Litera</th><th>Kraj</th><th>Restauracja</th></tr></thead><tbody>';
+    rows.forEach(function(e){h+='<tr><td>'+esc(ymLabel(e.ym))+'</td><td class="l">'+esc(e.letter)+'</td><td>'+esc(e.country||"jeszcze nie wybrano")+'</td><td>'+esc(e.place||"")+'</td></tr>';});
+    h+='</tbody></table></div>';
+  }
+  h+='</section>';
+  h+='<section class="card"><h3>Prywatny dziennik</h3><p>'+(token?'Ta przeglądarka zapisuje dziennik w prywatnym repozytorium <b>'+GH.owner+'/'+GH.repo+'</b>.':'Dziennik jest teraz tylko w tej przeglądarce. Wklej token GitHuba z dostępem do prywatnego repozytorium <b>'+GH.owner+'/'+GH.repo+'</b>, żeby zapisywać go tam i widzieć na każdym urządzeniu.')+'</p>'+
+    '<p class="muted">Token zostaje wyłącznie w tej przeglądarce. Inni odwiedzający stronę nie widzą Twoich wpisów.</p>'+
+    '<div class="row">'+(token?'<button class="btn ghost" id="tok-clear">Odłącz tę przeglądarkę</button>':'<label for="tok" style="flex:1 1 260px">Token (fine-grained, Contents: Read and write)<input type="password" id="tok" autocomplete="off" placeholder="github_pat_…"></label><button class="btn ghost" id="tok-save">Połącz</button>')+'</div></section>';
+  h+='</div>';
+  document.getElementById("app").innerHTML=h;
+}
+var viewCountry=null;
+document.getElementById("app").addEventListener("click",function(ev){
+  var t=ev.target.closest("button");if(!t||spinning)return;
+  if(t.id==="tok-save"){var v=document.getElementById("tok").value.trim();if(v){token=v;try{localStorage.setItem("kuchnie-az-token",v);}catch(e){}render();pull();}return;}
+  if(t.id==="tok-clear"){token="";ghSha=null;try{localStorage.removeItem("kuchnie-az-token");}catch(e){}setStatus("Odłączono. Dziennik zostaje w tej przeglądarce.");render();return;}
+  if(t.id==="draw"){viewCountry=null;draw();return;}
+  if(t.id==="pick"){viewCountry=null;setLetter(viewLetter);return;}
+  if(t.dataset.l){viewLetter=t.dataset.l;viewCountry=null;render();return;}
+  if(t.dataset.c!=null){
+    var cur=current(),c=DATA[viewLetter][+t.dataset.c];
+    if(cur&&cur.letter===viewLetter){if(cur.country!==c.name){cur.country=c.name;cur.place="";save();}}
+    else viewCountry=+t.dataset.c;
+    render();
+  }
+});
+document.getElementById("app").addEventListener("change",function(ev){
+  if(ev.target.id==="place"){var cur=current();if(cur){cur.place=ev.target.value.trim();save();render();}}
+});
+render();
+pull();
+</script></body></html>
